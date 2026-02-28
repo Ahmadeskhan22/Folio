@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const asyncHandler = require("express-async-handler");
+const { verifyTokenandAdmin } = require("../middlewares/verifyToken");
 
 // الاستيراد الصحيح والوحيد للموديل والدوال
 const {
@@ -18,9 +19,13 @@ router.get(
   }),
 );
 
-// POST: إنشاء مؤلف جديد
+// POST:
+//private --(only admin)
+//api/authors
+// create new author
 router.post(
   "/",
+  verifyTokenandAdmin,
   asyncHandler(async (req, res) => {
     // التحقق من البيانات المرسلة
     const { error } = validateCreateAuthor(req.body);
@@ -40,9 +45,14 @@ router.post(
   }),
 );
 
-// PUT: تحديث بيانات مؤلف
+// PUT:
+//private --(only admin)
+//api/authors
+// create new author
 router.put(
   "/:id",
+  verifyTokenandAdmin,
+
   asyncHandler(async (req, res) => {
     const { error } = validateUpdateInfoAuthor(req.body);
     if (error) {
@@ -72,6 +82,10 @@ router.put(
 // DELETE: حذف مؤلف
 router.delete(
   "/:id",
+  verifyTokenandAdmin,
+  //private --(only admin)
+  //api/authors
+  // create new author
   asyncHandler(async (req, res) => {
     const author = await Author.findById(req.params.id);
     if (author) {
