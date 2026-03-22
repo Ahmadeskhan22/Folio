@@ -1,33 +1,56 @@
 const express = require("express");
-const mongoose = require("mongoose");
-require("dotenv").config();
-const jwt = require("jsonwebtoken");
-const bcrypt = require("bcryptjs");
-
-// 1. تحميل الإعدادات (أهم خطوة في البداية)
-
-// 2. استدعاء الميدل وير (تأكد من إملاء اسم المجلدmiddlewares)
 const logger = require("./middlewares/logger");
 const { notFound, errorHanlder } = require("./middlewares/errors");
+require("dotenv").config();
 const connectToDB = require("./config/db");
+const path = require("path");
+const helmet = require("helmet");
+const cors = require("cors");
 
-// 3. تهيئة التطبيق
+// Connection To Database
+connectToDB();
+
+// Init App
 const app = express();
+
+// Static Folder
+app.use(express.static(path.join(__dirname, "images")));
+
+// Apply Middlewares
 app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 app.use(logger);
 
-// 4. الاتصال بقاعدة البيانات
-connectToDB();
-// 5. المسارات (Routes) - استدعاء مباشر لتجنب أخطاء المتغيرات
+// Helmet
+app.use(helmet());
+// to more app secury
+
+// Cors Policy
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: false
+}));
+
+
+// Set View Engine
+app.set("view engine", "ejs");
+
+// Routes
 app.use("/api/books", require("./routes/books"));
 app.use("/api/authors", require("./routes/authors"));
-app.use("/api/auth", require("./routes/auth")); // تأكد أن الملف اسمه auth.js داخل مجلد routes
+app.use("/api/auth", require("./routes/auth"));
 app.use("/api/users", require("./routes/users"));
-// 6. ميدل وير الأخطاء (يجب أن تكون في النهاية)
+app.use("/api/upload", require("./routes/upload"));
+app.use("/password", require("./routes/password"));
+
+// Error Hanlder Middleware
 app.use(notFound);
 app.use(errorHanlder);
 
-const PORT = process.env.PORT || 5000;
+// Running The Server
+const PORT = process.env.PORT;
 app.listen(PORT, () =>
   console.log(
     `Server is running in ${process.env.NODE_ENV} mode on port ${PORT}`,

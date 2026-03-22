@@ -2,136 +2,63 @@ const express = require("express");
 const router = express.Router();
 const asyncHandler = require("express-async-handler");
 const { verifyTokenandAdmin } = require("../middlewares/verifyToken");
-
+const {
+  getAllbooks,
+  getbookById,
+  AddBooks,
+  DeleteBooks,
+  UpdateBook,
+} = require("../controller/bookControllers");
 const {
   validateCreateBook,
   validateUpdateBook,
   Book,
 } = require("../models/Book");
+/*
+Operator
+Description
+$eq
 
-router.get(
-  "/",
-  asyncHandler(async (req, res) => {
-    const books = await Book.find().populate("author", [
-      "_id",
-      "firstname",
-      "lastname",
-    ]);
-    res.status(200).json(books);
-  }),
-);
+Matches values equal to a specified value.
 
-/**
- * @desc Get all books by id
- * @route  /api/books/:id
- * @method GET
- * @access public
- *
- *
- */
+$gt
 
-router.get(
-  "/:id",
-  asyncHandler(async (req, res) => {
-    const book = await Book.findById(req.params.id).populate("author");
-    if (book) {
-      res.status(200).json(book);
-    } else {
-      res.status(404).json({ message: "book not found" });
-    }
-  }),
-);
-/**
- * @desc Get all books
- * @route  /api/books
- * @method POST
- * @access public
- *
- *
- */
+Matches values greater than a specified value.
 
-router.post(
-  "/",
-  asyncHandler(async (req, res) => {
-    const { error } = validateCreateBook(req.body);
+$gte
 
-    if (error) {
-      return res.status(400).json({ message: error.details });
-    }
+Matches values greater than or equal to a specified value.
 
-    const book = new Book({
-      title: req.body.title,
-      author: req.body.author,
-      description: req.body.description,
-      price: req.body.price,
-      cover: req.body.cover,
-    });
-    const result = await book.save();
-    res.status(201).json(book);
-  }),
-);
+$in
 
-//validate create Book
+Matches any values specified in an array.
 
-//to update data
-/**
- * @desc update   books
- * @route  /api/books
- * @method PUT
- * @access private (only admin)
- *
- *
- */
+$lt
 
-router.put(
-  "/:id",
-  verifyTokenandAdmin,
-  asyncHandler(async (req, res) => {
-    const { error } = validateUpdateBook(req.body);
-    if (error) {
-      res.status(404).json({ message: "book not be update" });
-    }
+Matches values less than a specified value.
 
-    const updatedBook = await Book.findByIdAndUpdate(
-      req.params.id,
-      {
-        $set: {
-          title: req.body.title,
-          author: req.body.author,
-          description: req.body.description,
-          price: req.body.price,
-          cover: req.body.cover,
-        },
-      },
-      { new: true },
-    );
-    res.status(200).json(updatedBook);
-  }),
-);
+$lte
 
-//to delete data
-/**
- * @desc udelete  books
- * @route  /api/books
- * @method DELETE
- * @access private (only admin)
- *
- *
- */
+Matches values less than or equal to a specified value.
 
-router.delete(
-  "/:id",
-  verifyTokenandAdmin,
+$ne
 
-  asyncHandler(async (req, res) => {
-    const book = await Book.findById(req.params.id);
-    if (book) {
-      await Book.findByIdAndDelete(req.params.id);
-      res.status(200).json({ message: "Book is  deleted" });
-    } else {
-      res.status(404).json({ message: "Book is not found" });
-    }
-  }),
-);
+Matches all values not equal to a specified value.
+
+$nin
+
+Matches if the value is not equal to any of a given list of values.
+
+
+*/
+router.get("/", getAllbooks);
+
+router.get("/:id", getbookById);
+
+router.post("/", verifyTokenandAdmin, AddBooks);
+
+router.put("/:id", verifyTokenandAdmin, UpdateBook);
+
+router.delete("/:id", verifyTokenandAdmin,DeleteBooks);
 
 module.exports = router;

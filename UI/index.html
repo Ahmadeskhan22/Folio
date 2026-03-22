@@ -1,0 +1,1254 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Folio — Book Store</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div id="app">
+      <!-- ╔══════ NAV ══════╗ -->
+      <nav>
+        <div class="nav-logo" onclick="navigate('home')">Folio</div>
+        <ul class="nav-links">
+          <li><a onclick="navigate('home')" data-page="home">Home</a></li>
+          <li><a onclick="navigate('books')" data-page="books">Books</a></li>
+          <li>
+            <a onclick="navigate('authors')" data-page="authors">Authors</a>
+          </li>
+          <li>
+            <a
+              onclick="navigate('upload')"
+              data-page="upload"
+              id="nav-upload"
+              style="display: none"
+              >Upload</a
+            >
+          </li>
+        </ul>
+        <div class="nav-actions" id="nav-actions">
+          <button class="btn btn-ghost btn-sm" onclick="navigate('auth')">
+            Sign In
+          </button>
+          <button class="btn btn-primary btn-sm" onclick="openAddBookModal()">
+            + Add Book
+          </button>
+        </div>
+      </nav>
+
+      <!-- ╔══════ PAGE: HOME ══════╗ -->
+      <div class="page active" id="page-home">
+        <div class="hero">
+          <div class="hero-tag">Curated Reading Collection</div>
+          <h1>Discover <em>Stories</em><br />Worth Telling</h1>
+          <p>
+            A thoughtfully curated collection of books. Browse, discover, and
+            manage your literary world in one place.
+          </p>
+          <div class="hero-actions">
+            <button class="btn btn-primary" onclick="navigate('books')">
+              Browse Library
+            </button>
+            <button class="btn btn-ghost" onclick="navigate('authors')">
+              Meet Authors
+            </button>
+          </div>
+
+          <div class="hero-float" id="hero-float-books">
+            <div class="hero-float-card">Black Swan</div>
+            <div class="hero-float-card">The Forty Rules of Love</div>
+            <div class="hero-float-card">Skin in the Game</div>
+            <div class="hero-float-card">The Island of Missing Trees</div>
+          </div>
+        </div>
+
+        <div class="stats-strip">
+          <div class="stat-item">
+            <div class="stat-num" id="stat-books">—</div>
+            <div class="stat-label">Books in Collection</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-num" id="stat-authors">—</div>
+            <div class="stat-label">Authors</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-num">2</div>
+            <div class="stat-label">Cover Types</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-num">∞</div>
+            <div class="stat-label">Stories to Explore</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ╔══════ PAGE: BOOKS ══════╗ -->
+      <div class="page" id="page-books">
+        <div class="section">
+          <div class="section-header">
+            <h2 class="section-title">Library</h2>
+            <button class="btn btn-primary btn-sm" onclick="openAddBookModal()">
+              + New Book
+            </button>
+          </div>
+
+          <div class="toolbar">
+            <div class="search-box">
+              <input
+                type="text"
+                id="book-search"
+                placeholder="Search books…"
+                oninput="filterBooks()"
+              />
+            </div>
+            <select id="cover-filter" onchange="filterBooks()">
+              <option value="">All Covers</option>
+              <option value="soft cover">Soft Cover</option>
+              <option value="hard cover">Hard Cover</option>
+            </select>
+            <select id="sort-books" onchange="filterBooks()">
+              <option value="">Sort By</option>
+              <option value="price-asc">Price: Low → High</option>
+              <option value="price-desc">Price: High → Low</option>
+              <option value="title">Title A–Z</option>
+            </select>
+          </div>
+
+          <div id="books-container">
+            <div class="loading-center">
+              <div class="spinner"></div>
+              <span>Loading books…</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ╔══════ PAGE: AUTHORS ══════╗ -->
+      <div class="page" id="page-authors">
+        <div class="section">
+          <div class="section-header">
+            <h2 class="section-title">Authors</h2>
+            <button
+              class="btn btn-primary btn-sm"
+              onclick="openAddAuthorModal()"
+            >
+              + New Author
+            </button>
+          </div>
+
+          <div class="toolbar">
+            <div class="search-box">
+              <input
+                type="text"
+                id="author-search"
+                placeholder="Search authors…"
+                oninput="filterAuthors()"
+              />
+            </div>
+          </div>
+
+          <div id="authors-container">
+            <div class="loading-center">
+              <div class="spinner"></div>
+              <span>Loading authors…</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ╔══════ PAGE: UPLOAD ══════╗ -->
+      <div class="page" id="page-upload">
+        <div class="section">
+          <div class="section-header">
+            <h2 class="section-title">Upload Images</h2>
+          </div>
+          <div
+            class="upload-zone"
+            id="drop-zone"
+            ondragover="handleDragOver(event)"
+            ondragleave="handleDragLeave(event)"
+            ondrop="handleDrop(event)"
+            onclick="document.getElementById('file-input').click()"
+          >
+            <div class="upload-icon">📁</div>
+            <h3>Drop files here or click to browse</h3>
+            <p>Supports JPG, PNG, WebP — max 5MB each</p>
+            <input
+              type="file"
+              id="file-input"
+              multiple
+              accept="image/*"
+              style="display: none"
+              onchange="handleFileSelect(event)"
+            />
+          </div>
+          <div class="upload-preview" id="upload-preview"></div>
+          <div id="upload-actions" style="margin-top: 1.5rem; display: none">
+            <button class="btn btn-primary" onclick="uploadFiles()">
+              Upload to Server
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ╔══════ PAGE: AUTH ══════╗ -->
+      <div class="page" id="page-auth">
+        <div class="auth-card">
+          <div class="auth-logo">Folio</div>
+          <div class="auth-subtitle">Your personal book management system</div>
+
+          <div class="auth-tabs">
+            <div class="auth-tab active" onclick="switchAuthTab('login')">
+              Sign In
+            </div>
+            <div class="auth-tab" onclick="switchAuthTab('register')">
+              Create Account
+            </div>
+          </div>
+
+          <!-- Login -->
+          <div id="auth-login">
+            <div class="form-group">
+              <label class="form-label">Email</label>
+              <input
+                class="form-input"
+                type="email"
+                id="login-email"
+                placeholder="you@example.com"
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Password</label>
+              <input
+                class="form-input"
+                type="password"
+                id="login-password"
+                placeholder="••••••••"
+              />
+            </div>
+            <div style="text-align: right; margin-bottom: 1.25rem">
+              <a
+                href="#"
+                onclick="navigate('forgot')"
+                style="
+                  font-size: 0.8rem;
+                  color: var(--gold);
+                  text-decoration: none;
+                "
+                >Forgot password?</a
+              >
+            </div>
+            <button
+              class="btn btn-primary"
+              style="width: 100%"
+              onclick="doLogin()"
+            >
+              Sign In
+            </button>
+          </div>
+
+          <!-- Register -->
+          <div id="auth-register" style="display: none">
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label">First Name</label>
+                <input
+                  class="form-input"
+                  type="text"
+                  id="reg-firstname"
+                  placeholder="Ahmad"
+                />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Last Name</label>
+                <input
+                  class="form-input"
+                  type="text"
+                  id="reg-lastname"
+                  placeholder="Eskhan"
+                />
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Email</label>
+              <input
+                class="form-input"
+                type="email"
+                id="reg-email"
+                placeholder="you@example.com"
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Password</label>
+              <input
+                class="form-input"
+                type="password"
+                id="reg-password"
+                placeholder="Min 8 chars, uppercase, number…"
+              />
+            </div>
+            <button
+              class="btn btn-primary"
+              style="width: 100%; margin-top: 0.5rem"
+              onclick="doRegister()"
+            >
+              Create Account
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ╔══════ PAGE: FORGOT PASSWORD ══════╗ -->
+      <div class="page" id="page-forgot">
+        <div class="auth-card">
+          <div class="auth-logo">Folio</div>
+          <div class="auth-subtitle">Reset your password</div>
+          <div id="forgot-step-1">
+            <p
+              style="
+                color: var(--muted);
+                font-size: 0.85rem;
+                margin-bottom: 1.5rem;
+                text-align: center;
+              "
+            >
+              Enter your email and we will send you a reset link.
+            </p>
+            <div class="form-group">
+              <label class="form-label">Email Address</label>
+              <input
+                class="form-input"
+                type="email"
+                id="forgot-email"
+                placeholder="you@example.com"
+              />
+            </div>
+            <button
+              class="btn btn-primary"
+              style="width: 100%"
+              onclick="doForgotPassword()"
+            >
+              Send Reset Link
+            </button>
+            <div style="text-align: center; margin-top: 1.25rem">
+              <a
+                onclick="navigate('auth')"
+                style="
+                  font-size: 0.82rem;
+                  color: var(--gold);
+                  text-decoration: none;
+                  cursor: pointer;
+                "
+                >Back to Sign In</a
+              >
+            </div>
+          </div>
+          <div id="forgot-step-2" style="display: none; text-align: center">
+            <div style="font-size: 3rem; margin-bottom: 1rem">Email Sent</div>
+            <h3
+              style="font-family: var(--font-display); margin-bottom: 0.75rem"
+            >
+              Check your inbox
+            </h3>
+            <p
+              style="
+                color: var(--muted);
+                font-size: 0.85rem;
+                margin-bottom: 1.5rem;
+              "
+            >
+              We sent a reset link to<br />
+              <strong
+                id="forgot-email-sent"
+                style="color: var(--text)"
+              ></strong>
+            </p>
+            <p
+              style="
+                color: var(--muted);
+                font-size: 0.78rem;
+                margin-bottom: 1.5rem;
+              "
+            >
+              Did not receive it? Check spam or
+              <a
+                onclick="resetForgotForm()"
+                style="
+                  color: var(--gold);
+                  cursor: pointer;
+                  text-decoration: none;
+                "
+                >try again</a
+              >.
+            </p>
+            <button
+              class="btn btn-ghost"
+              style="width: 100%"
+              onclick="navigate('auth')"
+            >
+              Back to Sign In
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ╔══════ PAGE: RESET PASSWORD ══════╗ -->
+      <div class="page" id="page-reset">
+        <div class="auth-card">
+          <div class="auth-logo">Folio</div>
+          <div class="auth-subtitle">Create a new password</div>
+          <div id="reset-step-1">
+            <div class="form-group">
+              <label class="form-label">New Password</label>
+              <input
+                class="form-input"
+                type="password"
+                id="reset-password"
+                placeholder="Min 8 chars, uppercase, number"
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Confirm Password</label>
+              <input
+                class="form-input"
+                type="password"
+                id="reset-confirm"
+                placeholder="Repeat new password"
+              />
+            </div>
+            <button
+              class="btn btn-primary"
+              style="width: 100%; margin-top: 0.5rem"
+              onclick="doResetPassword()"
+            >
+              Save New Password
+            </button>
+          </div>
+          <div id="reset-step-2" style="display: none; text-align: center">
+            <div style="font-size: 3rem; margin-bottom: 1rem">Done</div>
+            <h3
+              style="font-family: var(--font-display); margin-bottom: 0.75rem"
+            >
+              Password updated!
+            </h3>
+            <p
+              style="
+                color: var(--muted);
+                font-size: 0.85rem;
+                margin-bottom: 1.5rem;
+              "
+            >
+              Your password has been changed successfully.
+            </p>
+            <button
+              class="btn btn-primary"
+              style="width: 100%"
+              onclick="navigate('auth')"
+            >
+              Sign In Now
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ╔══════ FOOTER ══════╗ -->
+      <footer>
+        <span class="footer-brand">Folio</span>
+        <span>© 2025 Book Store API — Ahmad Eskhan</span>
+      </footer>
+    </div>
+
+    <!-- ╔══════ MODAL: BOOK DETAIL ══════╗ -->
+    <div class="modal-overlay" id="modal-book-detail">
+      <div class="modal">
+        <div class="modal-header">
+          <div class="modal-title" id="detail-title">Book</div>
+          <button class="modal-close" onclick="closeModal('modal-book-detail')">
+            ✕
+          </button>
+        </div>
+        <div class="book-detail-grid">
+          <div class="book-detail-cover" id="detail-cover-text"></div>
+          <div class="book-detail-meta">
+            <div class="meta-row">
+              <span class="meta-label">Author</span>
+              <span class="meta-value" id="detail-author">—</span>
+            </div>
+            <div class="meta-row">
+              <span class="meta-label">Cover</span>
+              <span class="meta-value" id="detail-cover"></span>
+            </div>
+            <div class="meta-row">
+              <span class="meta-label">Price</span>
+              <span class="price-large" id="detail-price">—</span>
+            </div>
+          </div>
+        </div>
+        <div class="book-description" id="detail-description"></div>
+        <div class="modal-actions">
+          <button class="btn btn-ghost btn-sm" id="detail-edit-btn">
+            Edit
+          </button>
+          <button class="btn btn-danger btn-sm" id="detail-delete-btn">
+            Delete
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ╔══════ MODAL: ADD/EDIT BOOK ══════╗ -->
+    <div class="modal-overlay" id="modal-book-form">
+      <div class="modal">
+        <div class="modal-header">
+          <div class="modal-title" id="book-form-title">New Book</div>
+          <button class="modal-close" onclick="closeModal('modal-book-form')">
+            ✕
+          </button>
+        </div>
+        <input type="hidden" id="book-form-id" />
+        <div class="form-group">
+          <label class="form-label">Title</label>
+          <input
+            class="form-input"
+            type="text"
+            id="book-form-title-input"
+            placeholder="Book title"
+          />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Author</label>
+          <select class="form-input" id="book-form-author">
+            <option value="">Select an author…</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Description</label>
+          <textarea
+            class="form-input"
+            id="book-form-desc"
+            placeholder="A brief description…"
+          ></textarea>
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Price ($)</label>
+            <input
+              class="form-input"
+              type="number"
+              id="book-form-price"
+              placeholder="0.00"
+              step="0.01"
+            />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Cover Type</label>
+            <select class="form-input" id="book-form-cover">
+              <option value="soft cover">Soft Cover</option>
+              <option value="hard cover">Hard Cover</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-ghost" onclick="closeModal('modal-book-form')">
+            Cancel
+          </button>
+          <button class="btn btn-primary" onclick="submitBookForm()">
+            Save Book
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ╔══════ MODAL: ADD/EDIT AUTHOR ══════╗ -->
+    <div class="modal-overlay" id="modal-author-form">
+      <div class="modal">
+        <div class="modal-header">
+          <div class="modal-title" id="author-form-title">New Author</div>
+          <button class="modal-close" onclick="closeModal('modal-author-form')">
+            ✕
+          </button>
+        </div>
+        <input type="hidden" id="author-form-id" />
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">First Name</label>
+            <input
+              class="form-input"
+              type="text"
+              id="author-form-fname"
+              placeholder="First name"
+            />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Last Name</label>
+            <input
+              class="form-input"
+              type="text"
+              id="author-form-lname"
+              placeholder="Last name"
+            />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Nationality</label>
+          <input
+            class="form-input"
+            type="text"
+            id="author-form-nat"
+            placeholder="e.g. USA"
+          />
+        </div>
+        <div class="modal-actions">
+          <button
+            class="btn btn-ghost"
+            onclick="closeModal('modal-author-form')"
+          >
+            Cancel
+          </button>
+          <button class="btn btn-primary" onclick="submitAuthorForm()">
+            Save Author
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ╔══════ TOAST CONTAINER ══════╗ -->
+    <div id="toast-container"></div>
+
+    <script>
+      const API = {
+        BASE: "http://localhost:5000",
+        get BOOKS() {
+          return `${this.BASE}/api/books`;
+        },
+        get AUTHORS() {
+          return `${this.BASE}/api/authors`;
+        },
+        get AUTH() {
+          return `${this.BASE}/api/auth`;
+        },
+        get UPLOAD() {
+          return `${this.BASE}/api/upload`;
+        },
+      };
+
+      let state = {
+        books: [],
+        authors: [],
+        token: localStorage.getItem("folio_token") || null,
+        user: JSON.parse(localStorage.getItem("folio_user") || "null"),
+      };
+
+      const $ = (id) => document.getElementById(id);
+      const headers = (extra = {}) => ({
+        "Content-Type": "application/json",
+        ...(state.token ? { Authorization: `Bearer ${state.token}` } : {}),
+        ...extra,
+      });
+
+      async function api(method, url, body) {
+        try {
+          const res = await fetch(url, {
+            method,
+            headers: headers(),
+            body: body ? JSON.stringify(body) : undefined,
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.message || "Request failed");
+          return data;
+        } catch (e) {
+          throw e;
+        }
+      }
+
+      /* ═══════════ TOAST ═══════════ */
+      function toast(msg, type = "info") {
+        const el = document.createElement("div");
+        el.className = `toast ${type}`;
+        el.textContent = msg;
+        $("toast-container").appendChild(el);
+        setTimeout(() => el.remove(), 3500);
+      }
+
+      /* ═══════════ NAVIGATION ═══════════ */
+      function navigate(page) {
+        document
+          .querySelectorAll(".page")
+          .forEach((p) => p.classList.remove("active"));
+        document
+          .querySelectorAll(".nav-links a")
+          .forEach((a) => a.classList.remove("active"));
+        const target = $(`page-${page}`);
+        if (target) {
+          target.classList.add("active");
+          const link = document.querySelector(`[data-page="${page}"]`);
+          if (link) link.classList.add("active");
+        }
+        if (page === "books") loadBooks();
+        if (page === "authors") loadAuthors();
+        if (page === "home") loadStats();
+        window.scrollTo(0, 0);
+      }
+
+      /* ═══════════ AUTH UI ═══════════ */
+      function updateAuthUI() {
+        const actions = $("nav-actions");
+        const uploadNav = $("nav-upload");
+        if (state.token && state.user) {
+          actions.innerHTML = `
+      <div class="user-chip"><div class="user-dot"></div><span>${state.user.email || "User"}</span></div>
+      <button class="btn btn-ghost btn-sm" onclick="doLogout()">Sign Out</button>`;
+          if (uploadNav) uploadNav.style.display = "";
+        } else {
+          actions.innerHTML = `
+      <button class="btn btn-ghost btn-sm" onclick="navigate('auth')">Sign In</button>
+      <button class="btn btn-primary btn-sm" onclick="openAddBookModal()">+ Add Book</button>`;
+          if (uploadNav) uploadNav.style.display = "none";
+        }
+      }
+
+      function switchAuthTab(tab) {
+        document
+          .querySelectorAll(".auth-tab")
+          .forEach((t, i) =>
+            t.classList.toggle(
+              "active",
+              (i === 0 && tab === "login") || (i === 1 && tab === "register"),
+            ),
+          );
+        $("auth-login").style.display = tab === "login" ? "" : "none";
+        $("auth-register").style.display = tab === "register" ? "" : "none";
+      }
+
+      async function doLogin() {
+        const email = $("login-email").value.trim();
+        const password = $("login-password").value;
+        if (!email || !password) {
+          toast("Please fill all fields", "error");
+          return;
+        }
+        try {
+          const data = await api("POST", `${API.AUTH}/login`, {
+            email,
+            password,
+          });
+          state.token = data.token;
+          state.user = data.user || { email };
+          localStorage.setItem("folio_token", data.token);
+          localStorage.setItem("folio_user", JSON.stringify(state.user));
+          updateAuthUI();
+          navigate("books");
+          toast("Welcome back!", "success");
+        } catch (e) {
+          toast(e.message, "error");
+        }
+      }
+
+      async function doRegister() {
+        const firstName = $("reg-firstname").value.trim();
+        const lastName = $("reg-lastname").value.trim();
+        const email = $("reg-email").value.trim();
+        const password = $("reg-password").value;
+        if (!firstName || !lastName || !email || !password) {
+          toast("Please fill all fields", "error");
+          return;
+        }
+        try {
+          await api("POST", `${API.AUTH}/register`, {
+            firstName,
+            lastName,
+            email,
+            password,
+          });
+          toast("Account created! Please sign in.", "success");
+          switchAuthTab("login");
+        } catch (e) {
+          toast(e.message, "error");
+        }
+      }
+
+      function doLogout() {
+        state.token = null;
+        state.user = null;
+        localStorage.removeItem("folio_token");
+        localStorage.removeItem("folio_user");
+        updateAuthUI();
+        navigate("home");
+        toast("Signed out");
+      }
+
+      /* ═══════════ BOOKS ═══════════ */
+      async function loadBooks() {
+        $("books-container").innerHTML =
+          `<div class="loading-center"><div class="spinner"></div><span>Loading books…</span></div>`;
+        try {
+          const data = await api("GET", API.BOOKS);
+          state.books = Array.isArray(data) ? data : data.books || [];
+          renderBooks(state.books);
+        } catch (e) {
+          $("books-container").innerHTML =
+            `<div class="empty-state"><div class="empty-state-icon">📚</div><h3>Couldn't load books</h3><p>${e.message}</p></div>`;
+        }
+      }
+
+      function filterBooks() {
+        const q = $("book-search").value.toLowerCase();
+        const cover = $("cover-filter").value;
+        const sort = $("sort-books").value;
+        let filtered = state.books.filter((b) => {
+          const match =
+            b.title?.toLowerCase().includes(q) ||
+            b.description?.toLowerCase().includes(q);
+          const cov = !cover || b.cover === cover;
+          return match && cov;
+        });
+        if (sort === "price-asc") filtered.sort((a, b) => a.price - b.price);
+        if (sort === "price-desc") filtered.sort((a, b) => b.price - a.price);
+        if (sort === "title")
+          filtered.sort((a, b) => a.title.localeCompare(b.title));
+        renderBooks(filtered);
+      }
+
+      function renderBooks(books) {
+        if (!books.length) {
+          $("books-container").innerHTML =
+            `<div class="empty-state"><div class="empty-state-icon">📖</div><h3>No books found</h3><p>Try adjusting your search or add a new book.</p></div>`;
+          return;
+        }
+        $("books-container").innerHTML =
+          `<div class="books-grid">${books.map(bookCard).join("")}</div>`;
+      }
+
+      // ✅ FIX 1: reads both camelCase (new) and lowercase (old DB data)
+      function authorName(authorField) {
+        if (!authorField) return "Unknown Author";
+        if (typeof authorField === "object") {
+          const first = authorField.firstname || authorField.firstName || "";
+          const last = authorField.lastname || authorField.lastName || "";
+          return `${first} ${last}`.trim();
+        }
+        const found = state.authors.find((a) => a._id === authorField);
+        if (!found) return "Unknown Author";
+        const first = found.firstname || found.firstName || "";
+        const last = found.lastname || found.lastName || "";
+        return `${first} ${last}`.trim();
+      }
+
+      function bookCard(b) {
+        return `
+  <div class="book-card" onclick="openBookDetail('${b._id}')">
+    <div class="book-cover">
+      <span>${b.title}</span>
+      <div class="cover-badge">${b.cover || ""}</div>
+    </div>
+    <div class="book-info">
+      <div class="book-title">${b.title}</div>
+      <div class="book-author-name">${authorName(b.author)}</div>
+      <div class="book-footer">
+        <span class="book-price">$${b.price}</span>
+        <span class="badge ${b.cover === "soft cover" ? "badge-soft" : "badge-hard"}">${b.cover}</span>
+      </div>
+    </div>
+  </div>`;
+      }
+
+      function openBookDetail(id) {
+        const b = state.books.find((x) => x._id === id);
+        if (!b) return;
+        $("detail-title").textContent = b.title;
+        $("detail-cover-text").textContent = b.title;
+        $("detail-author").textContent = authorName(b.author);
+        $("detail-cover").innerHTML =
+          `<span class="badge ${b.cover === "soft cover" ? "badge-soft" : "badge-hard"}">${b.cover}</span>`;
+        $("detail-price").textContent = `$${b.price}`;
+        $("detail-description").textContent =
+          b.description || "No description available.";
+        $("detail-edit-btn").onclick = () => {
+          closeModal("modal-book-detail");
+          openEditBookModal(b);
+        };
+        $("detail-delete-btn").onclick = () => {
+          closeModal("modal-book-detail");
+          deleteBook(id);
+        };
+        openModal("modal-book-detail");
+      }
+
+      function openAddBookModal() {
+        $("book-form-title").textContent = "New Book";
+        $("book-form-id").value = "";
+        $("book-form-title-input").value = "";
+        $("book-form-desc").value = "";
+        $("book-form-price").value = "";
+        $("book-form-cover").value = "soft cover";
+        populateAuthorSelect();
+        openModal("modal-book-form");
+      }
+
+      function openEditBookModal(b) {
+        $("book-form-title").textContent = "Edit Book";
+        $("book-form-id").value = b._id;
+        $("book-form-title-input").value = b.title || "";
+        $("book-form-desc").value = b.description || "";
+        $("book-form-price").value = b.price || "";
+        $("book-form-cover").value = b.cover || "soft cover";
+        populateAuthorSelect(
+          typeof b.author === "object" ? b.author?._id : b.author,
+        );
+        openModal("modal-book-form");
+      }
+
+      // ✅ FIX 2: reads both lowercase and camelCase for dropdown
+      function populateAuthorSelect(selectedId = "") {
+        const sel = $("book-form-author");
+        sel.innerHTML =
+          `<option value="">Select an author…</option>` +
+          state.authors
+            .map((a) => {
+              const first = a.firstname || a.firstName || "";
+              const last = a.lastname || a.lastName || "";
+              return `<option value="${a._id}" ${a._id === selectedId ? "selected" : ""}>${first} ${last}</option>`;
+            })
+            .join("");
+      }
+
+      async function submitBookForm() {
+        const id = $("book-form-id").value;
+        const title = $("book-form-title-input").value.trim();
+        const author = $("book-form-author").value;
+        const desc = $("book-form-desc").value.trim();
+        const price = parseFloat($("book-form-price").value);
+        const cover = $("book-form-cover").value;
+        if (!title || !author || isNaN(price)) {
+          toast("Please fill required fields", "error");
+          return;
+        }
+        const body = { title, author, description: desc, price, cover };
+        try {
+          if (id) {
+            await api("PUT", `${API.BOOKS}/${id}`, body);
+            toast("Book updated", "success");
+          } else {
+            await api("POST", API.BOOKS, body);
+            toast("Book added!", "success");
+          }
+          closeModal("modal-book-form");
+          loadBooks();
+        } catch (e) {
+          toast(e.message, "error");
+        }
+      }
+
+      async function deleteBook(id) {
+        if (!confirm("Delete this book?")) return;
+        try {
+          await api("DELETE", `${API.BOOKS}/${id}`);
+          toast("Book deleted", "success");
+          loadBooks();
+        } catch (e) {
+          toast(e.message, "error");
+        }
+      }
+
+      /* ═══════════ AUTHORS ═══════════ */
+      async function loadAuthors() {
+        $("authors-container").innerHTML =
+          `<div class="loading-center"><div class="spinner"></div><span>Loading authors…</span></div>`;
+        try {
+          const data = await api("GET", API.AUTHORS);
+          state.authors = Array.isArray(data) ? data : data.authors || [];
+          renderAuthors(state.authors);
+        } catch (e) {
+          $("authors-container").innerHTML =
+            `<div class="empty-state"><div class="empty-state-icon">👤</div><h3>Couldn't load authors</h3><p>${e.message}</p></div>`;
+        }
+      }
+
+      // ✅ FIX 3: filter works with both lowercase and camelCase
+      function filterAuthors() {
+        const q = $("author-search").value.toLowerCase();
+        const filtered = state.authors.filter((a) => {
+          const first = a.firstname || a.firstName || "";
+          const last = a.lastname || a.lastName || "";
+          return (
+            (first + " " + last).toLowerCase().includes(q) ||
+            a.nationality?.toLowerCase().includes(q)
+          );
+        });
+        renderAuthors(filtered);
+      }
+
+      function renderAuthors(authors) {
+        if (!authors.length) {
+          $("authors-container").innerHTML =
+            `<div class="empty-state"><div class="empty-state-icon">✍️</div><h3>No authors found</h3><p>Add your first author.</p></div>`;
+          return;
+        }
+        $("authors-container").innerHTML =
+          `<div class="authors-grid">${authors.map(authorCard).join("")}</div>`;
+      }
+
+      // ✅ FIX 4: authorCard reads both lowercase and camelCase
+      function authorCard(a) {
+        const first = a.firstname || a.firstName || "";
+        const last = a.lastname || a.lastName || "";
+        const initials = `${first[0] || ""}${last[0] || ""}`.toUpperCase();
+        return `
+  <div class="author-card">
+    <div class="author-avatar">${initials}</div>
+    <div class="author-info">
+      <div class="author-name">${first} ${last}</div>
+      <div class="author-nationality">🌍 ${a.nationality || "—"}</div>
+      <div class="author-actions">
+        <button class="btn btn-ghost btn-sm" onclick="openEditAuthorModal(${JSON.stringify(a).replace(/"/g, "&quot;")})">Edit</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteAuthor('${a._id}')">Delete</button>
+      </div>
+    </div>
+  </div>`;
+      }
+
+      function openAddAuthorModal() {
+        $("author-form-title").textContent = "New Author";
+        $("author-form-id").value = "";
+        $("author-form-fname").value = "";
+        $("author-form-lname").value = "";
+        $("author-form-nat").value = "";
+        openModal("modal-author-form");
+      }
+
+      // ✅ FIX 5: pre-fill edit modal reading both lowercase and camelCase
+      function openEditAuthorModal(a) {
+        $("author-form-title").textContent = "Edit Author";
+        $("author-form-id").value = a._id;
+        $("author-form-fname").value = a.firstname || a.firstName || "";
+        $("author-form-lname").value = a.lastname || a.lastName || "";
+        $("author-form-nat").value = a.nationality || "";
+        openModal("modal-author-form");
+      }
+
+      // ✅ FIX 6: sends lowercase keys to match your backend model
+      async function submitAuthorForm() {
+        const id = $("author-form-id").value;
+        const firstname = $("author-form-fname").value.trim();
+        const lastname = $("author-form-lname").value.trim();
+        const nationality = $("author-form-nat").value.trim();
+        if (!firstname || !lastname) {
+          toast("First and last name required", "error");
+          return;
+        }
+        const body = { firstname, lastname, nationality }; // ← lowercase keys
+        try {
+          if (id) {
+            await api("PUT", `${API.AUTHORS}/${id}`, body);
+            toast("Author updated", "success");
+          } else {
+            await api("POST", API.AUTHORS, body);
+            toast("Author added!", "success");
+          }
+          closeModal("modal-author-form");
+          loadAuthors();
+        } catch (e) {
+          toast(e.message, "error");
+        }
+      }
+
+      async function deleteAuthor(id) {
+        if (!confirm("Delete this author?")) return;
+        try {
+          await api("DELETE", `${API.AUTHORS}/${id}`);
+          toast("Author deleted", "success");
+          loadAuthors();
+        } catch (e) {
+          toast(e.message, "error");
+        }
+      }
+
+      /* ═══════════ STATS ═══════════ */
+      async function loadStats() {
+        try {
+          const [books, authors] = await Promise.all([
+            api("GET", API.BOOKS),
+            api("GET", API.AUTHORS),
+          ]);
+          const bArr = Array.isArray(books) ? books : books.books || [];
+          const aArr = Array.isArray(authors) ? authors : authors.authors || [];
+          $("stat-books").textContent = bArr.length;
+          $("stat-authors").textContent = aArr.length;
+          state.books = bArr;
+          state.authors = aArr;
+        } catch (e) {
+          /* silently fail on home page */
+        }
+      }
+
+      /* ═══════════ UPLOAD ═══════════ */
+      let pendingFiles = [];
+
+      function handleDragOver(e) {
+        e.preventDefault();
+        $("drop-zone").classList.add("dragging");
+      }
+      function handleDragLeave() {
+        $("drop-zone").classList.remove("dragging");
+      }
+      function handleDrop(e) {
+        e.preventDefault();
+        $("drop-zone").classList.remove("dragging");
+        addFiles(e.dataTransfer.files);
+      }
+      function handleFileSelect(e) {
+        addFiles(e.target.files);
+      }
+
+      function addFiles(files) {
+        pendingFiles = [...pendingFiles, ...Array.from(files)];
+        renderUploadPreview();
+        $("upload-actions").style.display = pendingFiles.length ? "" : "none";
+      }
+
+      function renderUploadPreview() {
+        $("upload-preview").innerHTML = pendingFiles
+          .map(
+            (f) => `
+    <div class="upload-thumb">
+      <div class="upload-thumb-icon">🖼️</div>
+      <span>${f.name.length > 16 ? f.name.slice(0, 13) + "…" : f.name}</span>
+      <span style="color:var(--muted); font-size:0.7rem">${(f.size / 1024).toFixed(0)} KB</span>
+    </div>`,
+          )
+          .join("");
+      }
+
+      async function uploadFiles() {
+        if (!pendingFiles.length) return;
+        if (!state.token) {
+          toast("Please sign in to upload files", "error");
+          navigate("auth");
+          return;
+        }
+        const fd = new FormData();
+        pendingFiles.forEach((f) => fd.append("image", f));
+        try {
+          const res = await fetch(API.UPLOAD, {
+            method: "POST",
+            headers: { Authorization: `Bearer ${state.token}` },
+            body: fd,
+          });
+          if (!res.ok) throw new Error("Upload failed");
+          toast(`${pendingFiles.length} file(s) uploaded!`, "success");
+          pendingFiles = [];
+          renderUploadPreview();
+          $("upload-actions").style.display = "none";
+        } catch (e) {
+          toast(e.message, "error");
+        }
+      }
+
+      /* ═══════════ MODAL HELPERS ═══════════ */
+      function openModal(id) {
+        $(id).classList.add("open");
+      }
+      function closeModal(id) {
+        $(id).classList.remove("open");
+      }
+
+      document.querySelectorAll(".modal-overlay").forEach((el) => {
+        el.addEventListener("click", (e) => {
+          if (e.target === el) el.classList.remove("open");
+        });
+      });
+
+      /* ═══════════ FORGOT PASSWORD ═══════════ */
+      async function doForgotPassword() {
+        const email = $("forgot-email").value.trim();
+        if (!email) {
+          toast("Please enter your email", "error");
+          return;
+        }
+
+        try {
+          await api(
+            "POST",
+            `${API.BASE}/password/reset-password-link/${user._id}/${token}`,
+            { email },
+            //await api('POST', `${API.BASE}/password/reset-password-link`, { email });
+
+          );
+          $("forgot-email-sent").textContent = email;
+          $("forgot-step-1").style.display = "none";
+          $("forgot-step-2").style.display = "";
+          toast("Reset link sent!", "success");
+        } catch (e) {
+          toast(e.message || "Failed to send reset link", "error");
+        }
+      }
+
+      function resetForgotForm() {
+        $("forgot-step-1").style.display = "";
+        $("forgot-step-2").style.display = "none";
+        $("forgot-email").value = "";
+      }
+
+      /* ═══════════ RESET PASSWORD ═══════════ */
+      async function doResetPassword() {
+        const password = $("reset-password").value;
+        const confirm = $("reset-confirm").value;
+
+        if (!password || !confirm) {
+          toast("Please fill all fields", "error");
+          return;
+        }
+        if (password !== confirm) {
+          toast("Passwords do not match", "error");
+          return;
+        }
+        if (password.length < 8) {
+          toast("Password must be at least 8 characters", "error");
+          return;
+        }
+
+        // Read userId and token from URL params
+        // e.g. reset.html?userId=xxx&token=yyy
+        const params = new URLSearchParams(window.location.search);
+        const userId = params.get("userId");
+        const token = params.get("token");
+
+        if (!userId || !token) {
+          toast("Invalid or expired reset link", "error");
+          return;
+        }
+
+        try {
+          // POST /password/reset-password/:userId/:token
+          await api(
+            "POST",
+            `${API.BASE}/password/reset-password/${userId}/${token}`,
+            { password },
+          );
+          $("reset-step-1").style.display = "none";
+          $("reset-step-2").style.display = "";
+        } catch (e) {
+          toast(e.message || "Reset failed — link may have expired", "error");
+        }
+      }
+
+      // Auto-detect reset link on page load
+      // If URL has ?userId=&token= → go straight to reset page
+      (function checkResetLink() {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get("userId") && params.get("token")) {
+          navigate("reset");
+        }
+      })();
+
+      /* ═══════════ INIT ═══════════ */
+      updateAuthUI();
+      loadStats();
+    </script>
+  </body>
+</html>

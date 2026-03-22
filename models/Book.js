@@ -1,5 +1,7 @@
 const { required } = require("joi");
 const mongoose = require("mongoose");
+const Joi = require("joi");
+
 //onst Joi = require("joi");
 
 //Book schama
@@ -18,7 +20,7 @@ const BookSchema = new mongoose.Schema(
       ref: "Author",
     },
 
-    descripiton: {
+    description: {
       type: String,
       required: true,
     },
@@ -27,7 +29,7 @@ const BookSchema = new mongoose.Schema(
       required: true,
     },
 
-    conver: {
+    cover: {
       type: String,
       required: true,
       enum: ["soft cover", "hard cover"],

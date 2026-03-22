@@ -16,7 +16,4 @@ const errorHanlder = (err, req, res, next) => {
 };
 
 // التأكد من التصدير بهذا الشكل (Object)
-module.exports = {
-  notFound,
-  errorHanlder,
-};
+module.exports = { notFound, errorHanlder };
